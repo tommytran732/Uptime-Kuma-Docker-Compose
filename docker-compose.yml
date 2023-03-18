@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:alpine
+    container_name: uptime-kuma
+    restart: unless-stopped
+    volumes:
+      - uptime-kuma:/app/data
+    networks:
+      - uptime-kuma
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+
+  swag:
+    image: ghcr.io/linuxserver/swag
+    container_name: swag
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - URL=yourdomain.tld
+      - SUBDOMAINS=status
+      - VALIDATION=http
+      - EMAIL=changeme@yourdomain.tld
+      - ONLY_SUBDOMAINS=true
+    volumes:
+      - ./swag:/config:Z
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 443:443
+      - 80:80
+    networks:
+      - uptime-kuma
+    security_opt:
+      - no-new-privileges:true
+    cap_add:
+      - NET_ADMIN
+
+networks:
+  uptime-kuma:
+
+volumes:
+  uptime-kuma:
